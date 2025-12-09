@@ -1,9 +1,10 @@
 FROM node:20-alpine
 
 WORKDIR /app
+RUN rm -rf node_modules
 
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
 COPY . .
 
