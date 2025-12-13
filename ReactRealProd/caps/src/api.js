@@ -1,38 +1,27 @@
 // src/api.js
-const API_BASE_URL = import.meta.env.VITE_API_URL
-? `${import.meta.env.VITE_API_URL}/api`
-: "https://project-capstone-jwjz.onrender.com/api";
+const ENV_URL = import.meta.env.VITE_API_URL;
 
-function getToken() {
-return localStorage.getItem("token");
-}
+// kalau build di netlify (https), jangan pernah pakai localhost
+const API_BASE_URL =
+ENV_URL && !ENV_URL.includes("localhost")
+    ? `${ENV_URL}/api`
+    : "https://project-capstone-jwjz.onrender.com/api";
 
 export async function apiFetch(path, options = {}) {
-const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-};
-
-const token = getToken();
-if (token) {
-    headers.Authorization = `Bearer ${token}`;
-}
+const token = localStorage.getItem("token");
 
 const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers,
+    headers: {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+    },
 });
 
-let data = null;
-try {
-    data = await res.json();
-} catch {
-    // backend tidak mengirim JSON
-}
+const text = await res.text();
+const data = text ? JSON.parse(text) : null;
 
-if (!res.ok) {
-    throw new Error(data?.message || `Request failed: ${res.status}`);
-}
-
+if (!res.ok) throw new Error(data?.message || `Request failed: ${res.status}`);
 return data;
 }
