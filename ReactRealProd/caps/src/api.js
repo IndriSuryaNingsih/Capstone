@@ -1,14 +1,15 @@
 // src/api.js
-const API_BASE_URL =
-import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL
+? `${import.meta.env.VITE_API_URL}/api`
+: "https://project-capstone-jwjz.onrender.com/api";
 
 function getToken() {
-return localStorage.getItem('token');
+return localStorage.getItem("token");
 }
 
 export async function apiFetch(path, options = {}) {
 const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options.headers || {}),
 };
 
@@ -26,7 +27,7 @@ let data = null;
 try {
     data = await res.json();
 } catch {
-    // kalau backend tidak mengirim JSON
+    // backend tidak mengirim JSON
 }
 
 if (!res.ok) {
